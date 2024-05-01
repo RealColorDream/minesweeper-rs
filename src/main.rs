@@ -1,4 +1,3 @@
-use std::cell;
 use rand::{random, Rng};
 
 struct Cell{
