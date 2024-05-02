@@ -1,4 +1,3 @@
-use std::arch::x86_64::_mm_cmpord_pd;
 use rand::{Rng, thread_rng};
 
 struct Cell{
@@ -181,9 +180,9 @@ impl MineSweeper {
     }
 
     pub fn user_display(&mut self){
-        for i in 0..self.grid.rows() {
+        for _i in 0..self.grid.rows() {
             print!(" | ");
-            for j in 0..self.grid.cols() {
+            for _j in 0..self.grid.cols() {
                 print!("■");
             }
             print!(" | ");
