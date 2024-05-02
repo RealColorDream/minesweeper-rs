@@ -1,4 +1,4 @@
-use rand::{random, Rng};
+use rand::{random, Rng, thread_rng};
 
 struct Cell{
     row: u8,
@@ -154,15 +154,31 @@ impl MineSweeper {
             cell.cell_type.set_is_revealed(true);
         }
     }
+
+    pub fn set_mine(&mut self, row:u8, col:u8) {
+        let cell = self.grid.get_cell_mut(row, col);
+        if !cell.cell_type.is_mine {
+            cell.cell_type.set_is_mine(true);
+        }
+    }
+
+    pub fn shuffle(&mut self){
+        let mut rng = thread_rng();
+        let rows = self.grid.rows();
+        let cols = self.grid.cols();
+        for i in 0..self.num_mines {
+            self.set_mine(rng.gen_range(0..rows), rng.gen_range(0..cols));
+            // random mine placement
+        }
+    }
 }
 
 fn main() {
-    let mut game = MineSweeper::new(4, 4, 1);
-    println!("{}", game.grid.get_cell(0, 0).cell_type.is_revealed); // false
-    game.set_reaveal(0, 0);
-    println!("{}", game.grid.get_cell(0, 0).cell_type.is_revealed); // true
-    
-    println!("{}", game.grid.get_cell(1, 1).cell_type.is_flagged); // false
-    game.set_flag(1, 1);
-    println!("{}", game.grid.get_cell(1, 1).cell_type.is_flagged); // true
+    let mut game = MineSweeper::new(2, 2, 1);
+    game.shuffle();
+    for i in 0..game.grid.rows() {
+        for j in 0..game.grid.cols() {
+            println!("{}", game.grid.get_cell(i, j).cell_type.is_mine);
+        }
+    }
 }

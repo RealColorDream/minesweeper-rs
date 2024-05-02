@@ -1,0 +1,1 @@
+# Minesweeper-rs is a simple TUI (terminal based) Minesweeper build in rust
