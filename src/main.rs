@@ -1,4 +1,4 @@
-use rand::{random, Rng, thread_rng};
+use rand::{Rng, thread_rng};
 
 struct Cell{
     row: u8,
