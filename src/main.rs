@@ -1,3 +1,4 @@
+use std::arch::x86_64::_mm_cmpord_pd;
 use rand::{Rng, thread_rng};
 
 struct Cell{
@@ -164,21 +165,50 @@ impl MineSweeper {
 
     pub fn shuffle(&mut self){
         let mut rng = thread_rng();
-        let rows = self.grid.rows();
-        let cols = self.grid.cols();
-        for _i in 0..self.num_mines {
-            self.set_mine(rng.gen_range(0..rows), rng.gen_range(0..cols));
-            // random mine placement
+        let mut rng_x = 0;
+        let mut rng_y = 0;
+        let mut nb_mine_placed = 0;
+
+        while nb_mine_placed < self.num_mines {
+            rng_x = rng.gen_range(0..self.grid.rows());
+            rng_y = rng.gen_range(0..self.grid.cols());
+            if !self.grid.get_cell(rng_x, rng_y).cell_type.is_mine { // not a mine
+                self.set_mine(rng_x, rng_y);
+                nb_mine_placed += 1;
+                // random mine placement
+            }
+        }
+    }
+
+    pub fn user_display(&mut self){
+        for i in 0..self.grid.rows() {
+            print!(" | ");
+            for j in 0..self.grid.cols() {
+                print!("■");
+            }
+            print!(" | ");
+            println!(" ");
+        }
+    }
+
+    pub fn debug_display(&mut self){
+        for i in 0..self.grid.rows() {
+            print!(" | ");
+            for j in 0..self.grid.cols() {
+                if self.grid.get_cell(i, j).cell_type.is_mine {
+                    print!("▣");
+                } else {
+                    print!("▢");
+                }
+            }
+            print!(" | ");
+            println!(" ");
         }
     }
 }
 
 fn main() {
-    let mut game = MineSweeper::new(2, 2, 1);
+    let mut game = MineSweeper::new(7, 7, (7*7)/3);
     game.shuffle();
-    for i in 0..game.grid.rows() {
-        for j in 0..game.grid.cols() {
-            println!("{}", game.grid.get_cell(i, j).cell_type.is_mine);
-        }
-    }
+    game.debug_display();
 }
