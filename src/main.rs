@@ -166,7 +166,7 @@ impl MineSweeper {
         let mut rng = thread_rng();
         let rows = self.grid.rows();
         let cols = self.grid.cols();
-        for i in 0..self.num_mines {
+        for _i in 0..self.num_mines {
             self.set_mine(rng.gen_range(0..rows), rng.gen_range(0..cols));
             // random mine placement
         }
