@@ -1,5 +1,6 @@
+use std::io;
 use rand::{Rng, thread_rng};
-
+use std::io::{Write};
 struct Cell{
     row: u8,
     col: u8,
@@ -148,7 +149,7 @@ impl MineSweeper {
         }
     }
 
-    pub fn set_reaveal(&mut self, row: u8, col: u8) {
+    pub fn set_reveal(&mut self, row: u8, col: u8) {
         let cell = self.grid.get_cell_mut(row, col);
         if !cell.cell_type.is_revealed{
             cell.cell_type.set_is_revealed(true);
@@ -162,7 +163,7 @@ impl MineSweeper {
         }
     }
 
-    pub fn shuffle(&mut self){
+    pub fn shuffle(&mut self) {
         let mut rng = thread_rng();
         let mut rng_x = 0;
         let mut rng_y = 0;
@@ -179,7 +180,7 @@ impl MineSweeper {
         }
     }
 
-    pub fn user_display(&mut self){
+    pub fn user_display(&mut self) {
         for _i in 0..self.grid.rows() {
             print!(" | ");
             for _j in 0..self.grid.cols() {
@@ -190,7 +191,7 @@ impl MineSweeper {
         }
     }
 
-    pub fn debug_display(&mut self){
+    pub fn debug_display(&mut self) {
         for i in 0..self.grid.rows() {
             print!(" | ");
             for j in 0..self.grid.cols() {
@@ -204,10 +205,100 @@ impl MineSweeper {
             println!(" ");
         }
     }
+
+    pub fn get_neighbours(&self, row: u8, col: u8) -> Vec<&Cell> {
+        let mut neighbours = Vec::new();
+        let directions = [
+            (-1, -1), (0, -1), (1, -1),
+            (-1, 0),           (1, 0),
+            (-1, 1),  (0, 1),  (1, 1),
+        ];
+
+        for (dx, dy) in &directions {
+            let new_row = (row as i8) + dx;
+            let new_col = (col as i8) + dy;
+
+            if new_row >= 0 && new_row < self.grid.rows() as i8 &&
+                new_col >= 0 && new_col < self.grid.cols() as i8 {
+                neighbours.push(self.grid.get_cell(new_row as u8, new_col as u8));
+            }
+        }
+        return neighbours;
+    }
+
+    pub fn count_mine_neighbours(&self, row: u8, col: u8) -> u8 {
+        let neighbours = self.get_neighbours(row, col);
+        neighbours.iter().filter(|cell| cell.cell_type.is_mine).count() as u8
+    }
+
+/*    pub fn neighbours_display(&mut self){
+    for i in 0..self.grid.rows() {
+        print!(" | ");
+        for j in 0..self.grid.cols() {
+            let cell = self.grid.get_cell(i, j);
+            if cell.cell_type.is_mine {
+                print!("▣");
+            } else {
+                let mine_count = self.count_mine_neighbours(i, j);
+                print!("{}", mine_count);
+            }
+        }
+        print!(" | ");
+        println!(" ");
+    }
+}*/
+
+    pub fn neighbours_display(&mut self){
+        for i in 0..self.grid.rows() {
+            print!(" | ");
+            for j in 0..self.grid.cols() {
+                let cell = self.grid.get_cell(i, j);
+                if cell.cell_type.is_mine {
+                    print!("▣");
+                } else if cell.cell_type.is_revealed {
+                    let mine_count = self.count_mine_neighbours(i, j);
+                    print!("{}", mine_count);
+                } else {
+                    print!("▢");
+                }
+            }
+            print!(" | ");
+            println!(" ");
+        }
+    }
+    pub fn dig(&mut self, row:u8, col:u8) -> bool {
+        if self.grid.get_cell(row, col).cell_type.is_mine {
+            self.is_game_over = true;
+            return false;
+        }
+        self.set_reveal(col, row);
+        return true;
+    }
+}
+
+pub fn get_user_input() -> u8 {
+    let mut input = String::new();
+    print!("Please enter a number: ");
+    io::stdout().flush().unwrap(); // Make sure the prompt is immediately displayed
+    io::stdin().read_line(&mut input).expect("Failed to read line");
+    let input: u8 = input.trim().parse().expect("Please type a number!");
+    input
+}
+
+fn play() {
+    let mut game = MineSweeper::new(7, 7, (7*7)/3);
+    game.shuffle();
+    println!("Game initialized !");
+
+    while !game.is_game_over {
+        game.neighbours_display();
+        println!("Dig ?");
+        let row = get_user_input();
+        let col = get_user_input();
+        game.dig(row, col);
+    }
 }
 
 fn main() {
-    let mut game = MineSweeper::new(7, 7, (7*7)/3);
-    game.shuffle();
-    game.debug_display();
+    play();
 }
